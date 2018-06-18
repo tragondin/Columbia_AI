@@ -10,10 +10,8 @@ import sys
 
 import math
 
-#### SKELETON CODE ####
 
-## The Class that Represents the Puzzle
-
+# The Class that Represents the Puzzle
 class PuzzleState(object):
     """docstring for PuzzleState"""
 
@@ -41,12 +39,12 @@ class PuzzleState(object):
         for i, item in enumerate(self.config):
 
             if item == 0:
-                self.blank_row = (int)(i / self.n)
+                self.blank_row = int(i / self.n)
                 self.blank_col = i % self.n
 
                 break
 
-# "pretty" representation of the puzzle's state
+    # "pretty" representation of the puzzle's state
     def display(self):
         result = ""
         for i in range(self.n):
@@ -60,8 +58,8 @@ class PuzzleState(object):
             result = result + str(line) + "\n"
         return result
 
-# return a string representation of the puzzle's state
-# by simply listing each number one after another with no delimiter
+    # return a string representation of the puzzle's state
+    # by simply listing each number one after another with no delimiter
     def to_number(self):
         if self.number == "":
             for i in range(self.n):
@@ -177,9 +175,10 @@ class PuzzleState(object):
     def get_config(self):
         return self.config
 
-# added this method to help decide between two nodes with the same priority in heapq
+    # added this method to help decide between two nodes with the same priority in heapq
     def __lt__(self, other):
         return self.to_number() <= other.to_number()
+
 
 # Function that appends to output.txt
 def write_output(final_state, nodes_expanded, search_depth, max_search_depth, run_time, max_ram):
@@ -193,13 +192,10 @@ def write_output(final_state, nodes_expanded, search_depth, max_search_depth, ru
         return_path.insert(0, state.action)
         state = state.parent
 
-    output_txt = "path_to_goal: " + str(return_path) \
-                    + "\ncost_of_path: " + str(final_state.cost) \
-                    + "\nnodes_expanded: " + str(nodes_expanded) \
-                    + "\nsearch_depth:" + str(search_depth) \
-                    + "\nmax_search_depth: " + str(max_search_depth) \
-                    + "\nrunning_time: " + str(run_time) \
-                    + "\nmax_ram_usage: " + str(max_ram) + "\n"
+    output_txt = "path_to_goal: {0}\ncost_of_path: {1}\nnodes_expanded: {2}\nsearch_depth:{3}\n" \
+                 "max_search_depth: {4}\nrunning_time: {5}\nmax_ram_usage: {6}\n".format(
+                 str(return_path), str(final_state.cost), str(nodes_expanded), str(search_depth), str(max_search_depth),
+                 str(run_time), str(max_ram))
     output_file = open("output.txt", "a+")
     output_file.write(output_txt)
     output_file.close()
@@ -273,7 +269,7 @@ def dfs_search(initial_state):
 
 
 # implementation of A_Star tree search
-def A_star_search(initial_state):
+def a_star_search(initial_state):
     # initialize various counters and timers
     start_time = time.time()
     # we'll use a heapq list for the priority queue
@@ -324,7 +320,7 @@ def distance(puzzle_state):
     for element in range(1, puzzle_state.get_n() ** 2):
         goal_tile_x = element % puzzle_state.get_n()
         goal_tile_y = element // puzzle_state.get_n()
-        tile = puzzle_state.get_config()[element:element+1][0]
+        tile = puzzle_state.get_config()[element:element + 1][0]
         tile_x = tile % puzzle_state.get_n()
         tile_y = tile // puzzle_state.get_n()
         total_distance += abs(tile_x - goal_tile_x) + abs(tile_y - goal_tile_y)
@@ -363,7 +359,7 @@ def main():
 
     elif sm == "ast":
 
-        A_star_search(hard_state)
+        a_star_search(hard_state)
 
     else:
 
@@ -372,4 +368,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
