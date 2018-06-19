@@ -181,6 +181,7 @@ class PuzzleState(object):
     def __lt__(self, other):
         return self.to_number() <= other.to_number()
 
+
 # Function that appends to output.txt
 def write_output(final_state, nodes_expanded, search_depth, max_search_depth, run_time, max_ram):
     # return path is constructed by walking back from the goal all the way to the start
@@ -297,7 +298,7 @@ def a_star_search(initial_state):
                 # we use the action that led to the creation of the child
                 # as the second element of the tuple used to establish state priority
                 # first one is distance to goal + cost to get to where we are
-                heappush(q, (distance(child) + child.cost, child.action_order , child))
+                heappush(q, (distance(child) + child.cost, child.action_order, child))
                 max_search = max(max_search, child.cost)
         count += 1
         # next one to process is on top of the queue:
@@ -349,7 +350,6 @@ def a_star_search_2(initial_state):
         # state = heappop(q)[1]
 
     # let's get our stats and print our results
-
 
 
 def calculate_total_cost(state):
