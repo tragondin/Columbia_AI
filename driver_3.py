@@ -197,8 +197,8 @@ def write_output(final_state, nodes_expanded, search_depth, max_search_depth, ru
     output_txt = "path_to_goal: {0}\ncost_of_path: {1}\nnodes_expanded: {2}\nsearch_depth: {3}\n" \
                  "max_search_depth: {4}\nrunning_time: {5}\nmax_ram_usage: {6}\n".format(
                  str(return_path), str(final_state.cost), str(nodes_expanded), str(search_depth), str(max_search_depth),
-                 str(run_time), str(max_ram))
-    output_file = open("output.txt", "a+")
+                 str(round(run_time, 8)), str(round(max_ram, 8)))
+    output_file = open("output.txt", "w+")
     output_file.write(output_txt)
     output_file.close()
 
