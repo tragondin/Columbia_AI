@@ -179,7 +179,6 @@ class PuzzleState(object):
     def __lt__(self, other):
         return self.to_number() <= other.to_number()
 
-
 # Function that appends to output.txt
 def write_output(final_state, nodes_expanded, search_depth, max_search_depth, run_time, max_ram):
     # return path is constructed by walking back from the goal all the way to the start
@@ -281,21 +280,24 @@ def a_star_search(initial_state):
     visited = {state.to_number(): state}
     count = 0
     max_search = 0
+    added_to_q = 0
 
     # we'll loop until we've found a state that matches the goal condition
     while not test_goal(state):
         for child in state.expand():
-            # if a child has not been visited OR
-            # if a child HAS been visited, but its distance to the goal + cost from the root
+            # if a child has not been visited
+            # OR if a child HAS been visited, but its distance to the goal + cost from the root
             # is less than the one we had visited before
             # add/replace in the visited dict, put in the queue with distance + cost as the priority measure
             if child.to_number() not in visited \
                     or distance(visited[child.to_number()]) + visited[child.to_number()].cost > \
                     distance(child) + child.cost:
                 visited[child.to_number()] = child
+                # added_to_q counter helps to determine higher-priority between two states with same priority
+                # added_to_q += 1
+                # heappush(q, (distance(child) + child.cost, added_to_q, child))
                 heappush(q, (distance(child) + child.cost, child))
                 max_search = max(max_search, child.cost)
-        # we've expanded state so increase our counter by 1
         count += 1
         # next one to process is on top of the queue:
         # tuple (lowest distance + cost, state)
@@ -305,6 +307,45 @@ def a_star_search(initial_state):
     max_ram = resource.getrusage(resource.RUSAGE_SELF)[2] / 2. ** 20
     run_time = time.time() - start_time
     write_output(state, count, state.cost, max_search, run_time, max_ram)
+
+
+def a_star_search_2(initial_state):
+    # initialize various counters and timers
+    start_time = time.time()
+    # we'll use a heapq list for the priority queue
+    visited = {}
+    q = []
+    heappush(q, (distance(initial_state) + initial_state.cost, initial_state))
+    # a dictionary of visited states. key is the string representation of the state.
+    # we use a dictionary here because we want to not only know if we've visited a state previously
+    # but if we did, we want to retrieve the distance + cost of that state
+
+    count = 0
+    max_search = 0
+
+    while len(q) != 0:
+        state = heappop(q)[1]
+        visited[state.to_number()] = state
+        if test_goal(state):
+            max_ram = resource.getrusage(resource.RUSAGE_SELF)[2] / 2. ** 20
+            run_time = time.time() - start_time
+            write_output(state, count, state.cost, max_search, run_time, max_ram)
+            return
+
+        for child in state.expand():
+            if child.to_number() not in visited \
+                    or distance(visited[child.to_number()]) + visited[child.to_number()].cost > \
+                    distance(child) + child.cost:
+                visited[child.to_number()] = child
+                heappush(q, (distance(child) + child.cost, child))
+                max_search = max(max_search, child.cost)
+        count += 1
+        # next one to process is on top of the queue:
+        # tuple (lowest distance + cost, state)
+        # state = heappop(q)[1]
+
+    # let's get our stats and print our results
+
 
 
 def calculate_total_cost(state):
@@ -320,7 +361,7 @@ def distance(puzzle_state):
     for element in range(1, puzzle_state.get_n() ** 2):
         goal_tile_x = element % puzzle_state.get_n()
         goal_tile_y = element // puzzle_state.get_n()
-        tile = puzzle_state.get_config()[element:element + 1][0]
+        tile = puzzle_state.get_config()[element]
         tile_x = tile % puzzle_state.get_n()
         tile_y = tile // puzzle_state.get_n()
         total_distance += abs(tile_x - goal_tile_x) + abs(tile_y - goal_tile_y)
@@ -361,6 +402,9 @@ def main():
 
         a_star_search(hard_state)
 
+    elif sm == "ast2":
+
+        a_star_search_2(hard_state)
     else:
 
         print("Enter valid command arguments !")
