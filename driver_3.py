@@ -36,6 +36,8 @@ class PuzzleState(object):
 
         self.number = ""
 
+        self.action_order = ["Initial", "Up", "Down", "Left", "Right"].index(action)
+
         for i, item in enumerate(self.config):
 
             if item == 0:
@@ -191,7 +193,7 @@ def write_output(final_state, nodes_expanded, search_depth, max_search_depth, ru
         return_path.insert(0, state.action)
         state = state.parent
 
-    output_txt = "path_to_goal: {0}\ncost_of_path: {1}\nnodes_expanded: {2}\nsearch_depth:{3}\n" \
+    output_txt = "path_to_goal: {0}\ncost_of_path: {1}\nnodes_expanded: {2}\nsearch_depth: {3}\n" \
                  "max_search_depth: {4}\nrunning_time: {5}\nmax_ram_usage: {6}\n".format(
                  str(return_path), str(final_state.cost), str(nodes_expanded), str(search_depth), str(max_search_depth),
                  str(run_time), str(max_ram))
@@ -280,7 +282,6 @@ def a_star_search(initial_state):
     visited = {state.to_number(): state}
     count = 0
     max_search = 0
-    added_to_q = 0
 
     # we'll loop until we've found a state that matches the goal condition
     while not test_goal(state):
@@ -293,15 +294,15 @@ def a_star_search(initial_state):
                     or distance(visited[child.to_number()]) + visited[child.to_number()].cost > \
                     distance(child) + child.cost:
                 visited[child.to_number()] = child
-                # added_to_q counter helps to determine higher-priority between two states with same priority
-                # added_to_q += 1
-                # heappush(q, (distance(child) + child.cost, added_to_q, child))
-                heappush(q, (distance(child) + child.cost, child))
+                # we use the action that led to the creation of the child
+                # as the second element of the tuple used to establish state priority
+                # first one is distance to goal + cost to get to where we are
+                heappush(q, (distance(child) + child.cost, child.action_order , child))
                 max_search = max(max_search, child.cost)
         count += 1
         # next one to process is on top of the queue:
-        # tuple (lowest distance + cost, state)
-        state = heappop(q)[1]
+        # tuple (lowest distance + cost, UDLR, state)
+        state = heappop(q)[2]
 
     # let's get our stats and print our results
     max_ram = resource.getrusage(resource.RUSAGE_SELF)[2] / 2. ** 20
@@ -315,7 +316,7 @@ def a_star_search_2(initial_state):
     # we'll use a heapq list for the priority queue
     visited = {}
     q = []
-    heappush(q, (distance(initial_state) + initial_state.cost, initial_state))
+    heappush(q, (distance(initial_state) + initial_state.cost, initial_state.action_order, initial_state))
     # a dictionary of visited states. key is the string representation of the state.
     # we use a dictionary here because we want to not only know if we've visited a state previously
     # but if we did, we want to retrieve the distance + cost of that state
@@ -324,7 +325,7 @@ def a_star_search_2(initial_state):
     max_search = 0
 
     while len(q) != 0:
-        state = heappop(q)[1]
+        state = heappop(q)[2]
         visited[state.to_number()] = state
         if test_goal(state):
             max_ram = resource.getrusage(resource.RUSAGE_SELF)[2] / 2. ** 20
@@ -337,7 +338,10 @@ def a_star_search_2(initial_state):
                     or distance(visited[child.to_number()]) + visited[child.to_number()].cost > \
                     distance(child) + child.cost:
                 visited[child.to_number()] = child
-                heappush(q, (distance(child) + child.cost, child))
+                # we use the action that led to the creation of the child
+                # as the second element of the tuple used to establish state priority
+                # first one is distance to goal + cost to get to where we are
+                heappush(q, (distance(child) + child.cost, child.action_order, child))
                 max_search = max(max_search, child.cost)
         count += 1
         # next one to process is on top of the queue:
